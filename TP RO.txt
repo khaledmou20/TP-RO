@@ -1,0 +1,425 @@
+package ordonnancement;
+ 
+import java.util.Scanner;
+import java.io.*;
+ 
+ 
+public class EXECv16 {
+     
+    public static void main(String[] args){
+         
+         
+        System.out.println("----------------\n ORDONNANCEMENT \n----------------");
+         
+        Scanner scan1 = new Scanner (System.in); /* Mon objet Scanner qui va me servir tout au long du programme */
+        Fonction f7 = new Fonction(); /* Objet qui permet d'appeler toutes les fonctions dans la classe "Fonction" */
+         
+        int choixAction = -1; /* Choix de l'action: ENREGISTRER PROCESSUS / AFFICHER PROCESSUS / ORDONNANCEMENT / QUITTER */
+        int choixordonnancement = 0; /* Pour le choix du type d'ordonnancement désiré */
+        int tpsSoumission; /* Le temps de soumission saisi par l'utilisateur */
+        int ptr = 0; /* ptr représente l'indice de la prochaine case vide dans mon tableau "listeProcessus". Va etre ecrit dans "Test.txt" */
+        Processus[] listeProcessus = new Processus[100]; /* Tableau où seront stockés les processus. C'est ce tableau qui va être écrit dans mon fichier "Ordonnancement1.txt" */
+        File fich = new File("C:/Users/johann/Desktop/pointeurListeProcessus.txt"); /* Fichier ou j'enregistre "ptr" */
+        File fich2 = new File("C:/Users/johann/Desktop/listeProcessus.txt"); /* Fichier ou j'enregistre mon tableau de processus */
+         
+         
+         
+        System.out.println("La taille de 'pointeurListeProcessus.txt' est : " + fich.length());
+        System.out.println("La taille de 'listeProcessus.txt' est : " + fich2.length());
+         
+         
+         
+         
+         
+        /* -------------------- INITIALISATION DES DONNEES (RECUPERATION DE 'listeProcessus' et 'ptr' -------------------- */
+         
+        /* ########## INITIALISATION DE PTR ########## */
+         
+        if (fich.length() > 0){
+                     
+                    try {
+                        ObjectInputStream in1 = new ObjectInputStream(new FileInputStream("C:/Users/johann/Desktop/pointeurListeProcessus.txt"));
+                        ptr = in1.readInt();
+                        in1.close();
+                    }
+                    catch (Exception e){
+                        e.printStackTrace();  
+                    }
+                
+                }
+                 
+                else {
+                     
+                    ptr = 0;
+                     
+                }
+         
+        /* ########## FIN INITIALISATION DE PTR ########## */
+            
+         
+         
+        /* ########## INITIALISATION DE LISTEPROCESSUS ########## */
+         
+        if (fich2.length() > 0){
+                     
+                    try {
+                        ObjectInputStream in2 = new ObjectInputStream(new FileInputStream("C:/Users/johann/Desktop/ListeProcessus.txt"));
+                        listeProcessus =  (Processus[]) in2.readObject();
+                        in2.close();
+                    }
+                    catch (Exception e){
+                        e.printStackTrace();  
+                    }
+                
+        }
+         
+        /* ########## FIN INITIALISATION DE LISTEPROCESSUS ########## */
+                       
+        /* -------------------- FIN PHASE D'INITIALISATION DES DONNEES (RECUPERATION DE 'listeProcessus' et 'ptr'= ---------------------- */
+         
+         
+         
+         
+         
+        /* -------------------- COEUR DU PROGRAMME -------------------- */
+         
+        while (choixAction != 1 || choixAction !=2 || choixAction !=3 || choixAction !=4){
+             
+            System.out.println("\nQue voulez vous faire ?\n1. Enregistrer un processus\n2. Afficher la liste des processus\n3. Effectuer un ordonnancement\n4. Quitter\n");
+            choixAction = scan1.nextInt();
+         
+            if (choixAction == 1){ /* >>>>>>>>>>>>>>>>>>>> CHOIX: ENREGISTRER UN PROCESSUS <<<<<<<<<<<<<<<<<<<< */
+                 
+                /* ########## ENREGISTREMENT DE PROCESSUS ########## */
+             
+                listeProcessus = f7.registerProcessus(ptr, listeProcessus);
+                ptr++;
+          
+                scan1.nextLine(); /* VIDAGE DU SCANNER */
+                
+                /* ########## FIN ENREGISTREMENT DE PROCESSUS ########## */
+                 
+                 
+                /* ########## SAUVEGARDE DE PTR ########## */
+                 
+                    try {
+                        ObjectOutputStream out1 = new ObjectOutputStream(new FileOutputStream("C:/Users/johann/Desktop/pointeurListeProcessus.txt"));
+                        out1.writeInt(ptr);
+                        out1.close();
+                    }
+                    catch (Exception e){
+                        e.printStackTrace();  
+                    }
+                 
+                /* ########## FIN SAUVEGARDE DE PTR ########## */
+                 
+                 
+                 
+                /* ########## SAUVEGARDE DE LISTEPROCESSUS ########## */
+                 
+                try {
+                        ObjectOutputStream out2 = new ObjectOutputStream(new FileOutputStream("C:/Users/johann/Desktop/listeProcessus.txt"));
+                        out2.writeObject(listeProcessus);
+                        out2.flush();
+                        out2.close();
+                }
+                catch (Exception e){
+                        e.printStackTrace();  
+                }
+                 
+                /* ########## FIN SAUVEGARDE DE LISTEPROCESSUS ########## */
+                 
+            } /* >>>>>>>>>>>>>>>>>>>> FIN CHOIX: ENREGISTRER UN PROCESSUS <<<<<<<<<<<<<<<<<<<< */
+             
+             
+             
+         
+            else if (choixAction == 2){ /* >>>>>>>>>>>>>>>>>>>> CHOIX: AFFICHER LISTE PROCESSUS <<<<<<<<<<<<<<<<<<<< */
+                 
+                if ( fich2.length() == 0 ){
+                     
+                    System.out.println("Il n'y a aucun processus enregistrés");
+                     
+                }
+                 
+                else {
+                 
+                System.out.println("\nVoici le contenu du tableau où sont enregistrés les processus\n");
+                f7.AfficheListeProcessus(ptr, listeProcessus);
+                 
+                }
+                 
+            } /* >>>>>>>>>>>>>>>>>>>> FIN CHOIX: AFFICHER LISTE PROCESSUS <<<<<<<<<<<<<<<<<<<< */
+         
+            else if (choixAction == 3){ /* >>>>>>>>>>>>>>>>>>>> CHOIX: ORDONNANCEMENT <<<<<<<<<<<<<<<<<<<< */
+                 
+                if ( fich2.length() == 0 ){
+                     
+                   System.out.println("Vous ne pouvez pas faire d'ordonnancement\nAucun processus n'est enregistré\n");
+                     
+                }
+                 
+                else { /* Il y a des processus enregistrés, on peut faire un ordonnancement */
+                 
+                    /* ########## CHOIX TYPE ORDONNANCEMENT ########## */
+                 
+                    System.out.println("Choisissez le type d'ordonnancement : \n1. First In First Out\n2. Shortest Job First ");
+                    choixordonnancement = scan1.nextInt();
+                    while ( (choixordonnancement != 1) && (choixordonnancement !=2) ) {
+ 
+                        System.out.println("Choisissez le type d'ordonnancement : \n1. First In First Out\n2. Shortest Job First ");
+                        choixordonnancement = scan1.nextInt();
+ 
+                    }
+ 
+                    int choixAffiche = 0;
+ 
+                    while (choixAffiche != 1 && choixAffiche != 2){
+ 
+                        System.out.println("Afficher la liste des processus ?\n 1. OUI\n 2. NON\n");
+                        choixAffiche = scan1.nextInt();
+ 
+                        if (choixAffiche == 1){
+ 
+                            System.out.println("\nVoici le contenu du tableau où sont enregistrés les processus\n");
+                            f7.AfficheListeProcessus(ptr, listeProcessus);
+ 
+                        }
+ 
+                        else if (choixAffiche == 2){
+ 
+                            /* On ne fait rien */
+ 
+                        }
+ 
+                        else {
+ 
+                            System.out.println("Erreur de saisie");
+ 
+                        }
+ 
+ 
+                    }
+ 
+                    /* ########## FIN CHOIX TYPE ORDONNANCEMENT ########## */
+ 
+ 
+ 
+                    if (choixordonnancement == 1){
+ 
+                        /* ########## ORDONNANCEMENT FIFO ########## */
+                        int nPAO;
+                        System.out.println("\nCombien voulez vous ordonnancer de processus ? ");
+                        nPAO = scan1.nextInt();
+ 
+                        String tabNom[] = f7.CreatTabNom(nPAO);
+                        int tabInterface[][] = f7.CreatTabInterface(nPAO);
+                        f7.RemplirColonneIndiceTabInterface(tabInterface, nPAO);
+                        f7.FIFOsearchAndAddProcessToTabNom(tabNom, nPAO, ptr, listeProcessus);
+                        scan1.nextLine(); /* VIDAGE DU SCANNER */
+                        int tabTempsSoumission[] = f7.CreatTabTempsSoumission(nPAO);
+ 
+                        for (int i = 0; i < nPAO; i++){
+ 
+                            System.out.println("Donner un temps de soumission pour " + tabNom[i] + " : ");
+                            tpsSoumission = scan1.nextInt();
+                            tabInterface[1][i] = tpsSoumission;
+                            tabTempsSoumission[i] = tpsSoumission;
+ 
+                        }
+ 
+                        /* ### MANQUE VERIFICATION POUR QU'ON AIT PAS 2 FOIS LE MEME TEMPS DE SOUMISSION ### */
+ 
+                        /* Le tableau interface vient d'être créé */
+                        f7.FIFOtri(tabInterface, nPAO); /* Point clé FIFO */
+                        /* Le tableau interface vient d'être trié */
+                        String tabResultFinal[] = f7.CreatTabResultatFinal(nPAO);
+                        f7.FIFORemplirTabResultatFInal(tabResultFinal, tabNom, tabInterface, nPAO); /* Point clé FIFO */
+                        System.out.println("\n####################\nLe resultat de l'ordonnancement FIFO est : ");
+                        f7.AfficheTabResultatFinal(tabResultFinal, nPAO);
+                        System.out.println("\n####################\n");
+ 
+                        /* ########## FIN ORDONNANCEMENT FIFO ########## */
+ 
+                    }
+ 
+                    else if (choixordonnancement == 2){
+ 
+                        /* ########## ORDONNANCEMENT SHORTEST JOB FIRST ########## */
+ 
+                        int nPAO;
+                        System.out.println("\nCombien voulez vous ordonnancer de processus ? ");
+                        nPAO = scan1.nextInt();
+ 
+                        String tabNom[] = f7.CreatTabNom(nPAO);
+                        int tabDuree[] = f7.CreatTabDuree(nPAO);
+                        f7.SJF_searchAndAddProcessToTabNomAndAddDureeToTabDuree(tabDuree, tabNom, nPAO, ptr, listeProcessus);
+                        int tabInterface[][] = f7.SJF_CreatTabInterface1(nPAO);
+                        f7.SJF_RemplirColonneIndiceTabInterface(tabInterface, nPAO);
+                        f7.SJF_RemplirColonneDureeTabInterface(tabInterface, nPAO, tabDuree);
+ 
+                        int tabTempsSoumission[] = f7.CreatTabTempsSoumission(nPAO);
+ 
+                        for (int i = 0; i < nPAO; i++){
+ 
+                            System.out.println("Donner un temps de soumission pour " + tabNom[i] + " : ");
+                            tpsSoumission = scan1.nextInt();
+                            tabInterface[2][i] = tpsSoumission;
+                            tabTempsSoumission[i] = tpsSoumission;
+ 
+                        }
+ 
+                        /* Le tableau interface vient d'être créé */
+ 
+                        /* !!!!! Définition des variables nécessaires à l'algorithme Shortest Job First !!!!!! */
+ 
+                        int[][] TABLEAU_SAUVEGARDE = new int[3][nPAO];
+ 
+                        for (int i = 0; i < nPAO; i++){ /* Copie case à case de 'tabInterface' dans 'TABLEAU_SAUVEGARDE' */
+                            for (int j = 0; j < 3; j++){
+                                TABLEAU_SAUVEGARDE[j][i] = tabInterface[j][i];
+                            }
+                        } /* Fin copie case à case */
+ 
+ 
+                        String[] tabFinal = f7.CreatTabResultatFinal(nPAO); /* Le tableau qui contient le resultat final et que l'on affichera à la fin. Il contient les 'noms' DANS L'ORDRE de nos processus ordonnancés  */
+                        int indTabFinal = 0;
+                        int TIME = 0; /* Variable temps: représentation VIRTUELLE du temps */
+                        int processusFait = 0; /* Compte le nombre de processus qu'on a déjà mis dans le tableau final */
+                        int dureeMin = 9999; /* Parmi tous les processus suceptibles de s'éxécuter, il y en a 1 dont la durée est la plus petite de toute.
+                                              * C'est dans cette variable qu'on stocke cette durée */
+                        int indProcessusVictime = 0; /* Variable dans laquelle on stocke l'indice du processus qui va etre stocké 'tabFinal'.
+                                                      * 'L'indice processus' est stocké dans 'tabInterface[0][i]' et à la MEME position que son 'nom' stocké dans 'tabNom'.
+                                                      * 'L'indice processus' permet donc de faire la correspondance entre 'tabInterface' et 'tabNom'. */
+                        boolean TempsSoumissionTousSuperieurATIME = true; /* Variable qui indique si les 'temps de soumission' des processus sont tous supérieurs à 'TIME'
+                                                                           * Si c'est le cas, on est trop tôt dans l'algorithme et aucun processus n'est suceptible d'être exécuté.
+                                                                           * Donc quand cette variable est à 'true', l'action à faire est d'incrémenter 'TIME' de 1 */
+ 
+                        /* !!!!! Fin définition des variables nécessaires à l'algorithme Shortest Job First !!!!! */
+ 
+ 
+ 
+                        while (processusFait != nPAO){ /* Tant qu'on a pas tous nos processus stockés dans le tableau de résultat final */
+ 
+                            while (TempsSoumissionTousSuperieurATIME == true){
+ 
+                                for (int i = 0; i < nPAO; i++){ /* Copie (case à case) de 'TABLEAU_SAUVEGARDE' dans 'tabInterface' */
+                                    for (int j = 0; j < 3; j++){
+                                        tabInterface[j][i] = TABLEAU_SAUVEGARDE[j][i];
+                                    }
+                                } /* Fin Copie */
+ 
+ 
+                                /* La REINITIALISATION de tabInterface a été effectuée là maintenant.
+                                 * C'était le but de la boucle juste au dessus */
+ 
+                                for (int i = 0; i < nPAO; i++){
+ 
+                                    if ( (tabInterface[2][i] > TIME) && (tabInterface[2][i] >= 0) ){ /* Si 'Temps de soumission' > TIME   ET   'Temps de soumission' positif( != -1 ) */
+ 
+                                        tabInterface[2][i] = -1; /* 'Temps de soumission' = -1 */
+                                        tabInterface[1][i] = -1; /* 'Durée' = -1 */
+ 
+                                    }
+ 
+                                }
+                                /* On vient de mettre toutes les 'durées' et 'temps de soumission' des processus non suceptibles d'être exécuté à ce 'TIME' précis */
+ 
+                                for (int i = 0; i < nPAO; i++){
+                                    if (tabInterface[2][i] != -1){ /* Si on trouve un 'temps de soumission' différent de '-1'
+                                                                    * C'est forcement que des processus sont suceptibles de s'exécuter à ce 'TIME' précis */
+                                        TempsSoumissionTousSuperieurATIME = false;
+ 
+                                    }
+                                }
+ 
+                                if (TempsSoumissionTousSuperieurATIME == true){ /* Si 'TSTSAT' est à 'true' à ce stade, c'est que aucun processus n'est suceptible de s'éxécuter à ve 'TIME' précis */
+                                    TIME ++; /* On incrémente donc 'TIME' pour recommencer le test" */
+                                }
+ 
+                            } /* FIN WHILE 'TSTSAT' == true */
+ 
+                            /* Maintenant, on va déterminer parmi les processus suceptibles de s'éxécuter celui qui a la durée minimimum.
+                             * C'est celui là qui s'executera en 1er.
+                             * Principe du Shortest Job First */
+ 
+                            /**/
+                            for (int i = 0; i < nPAO; i++){
+ 
+                                if ( (tabInterface[2][i] >= 0) &&  (tabInterface[1][i] < dureeMin) && (tabInterface[1][i] >= 0) ) { /* Si 'Temps Soumission' != '-1'  ET
+                                                                                                                                    * Si 'Duree' < 'dureeMin' ET                                                                                            * Si 'Duree' != '-1' */
+                                    dureeMin = tabInterface[1][i]; /* C'est CE processus qui a la durée minimum pour l'instant */
+                                    indProcessusVictime = tabInterface[0][i]; /* On retient l'indice de ce processus */
+ 
+                                }
+ 
+ 
+                            }
+ 
+                            /* Parmi les processus suceptibles de s'executer au temps 'TIME', on a trouve que c'est le processus 'tabNom[indProcessusVictime]'
+                             * qui avait la 'duree' la plus courte */
+ 
+                            tabFinal[indTabFinal] = tabNom[indProcessusVictime]; /* Ecriture du processus choisi par 'Shortest Job First' dans le tableau final */
+                            TIME = TIME + dureeMin; /* Incrementation de 'TIME' de la durée d'exécution de ce processus */
+ 
+                            TABLEAU_SAUVEGARDE[2][indProcessusVictime] = -1; /* On met le 'temps de soumission' de ce processus à '-1' dans 'TABLEAU_SAUVEGARDE'
+                                                                              * dans le but de l'éliminer de nos choix par la suite.
+                                                                              * Ce processus a été ordonnancé c'est bon */
+ 
+                            /* Maintenant on incremente et on reinitialise toutes nos variables utiles à l'algorithme 'Shortest Job First' */
+                            indTabFinal ++;
+                            processusFait++;
+                            indProcessusVictime = 0; /* Reinitialisation de 'indProcessusVictime' */
+                            dureeMin = 9999; /* Reinitialisation de 'dureeMin' */
+                            TempsSoumissionTousSuperieurATIME = true; /* Reinitialisation de 'TSTSAT' */
+ 
+ 
+                        } /* FIN WHILE PROCESSUSFAIT != nPAO */ 
+ 
+                        System.out.println("\n####################\nLe résultat de l'ordonnancement selon l'algorithme Shortest Job First est : ");
+                        f7.AfficheTabResultatFinal(tabFinal, nPAO);
+                        System.out.println("\n####################\n");
+ 
+                        /* ########## FIN ORDONNANCEMENT SHORTEST JOB FIRST ########## */
+ 
+                    }
+                 
+                } /* Fin else 'Il y a des processus enregistrés, on peut faire un ordonnancement' */
+                 
+            } /* >>>>>>>>>>>>>>>>>>>> FIN CHOIX: ORDONNANCEMENT <<<<<<<<<<<<<<<<<<<<< */
+             
+             
+             
+         
+            else if (choixAction == 4){ /* >>>>>>>>>>>>>>>>>>>> CHOIX: QUITTER <<<<<<<<<<<<<<<<<<<<< */
+                 
+                System.exit(0);
+             
+            } /* >>>>>>>>>>>>>>>>>>>> FIN CHOIX: QUITTER <<<<<<<<<<<<<<<<<<<<< */
+             
+             
+             
+         
+            else { /* >>>>>>>>>>>>>>>>>>>> ERREUR DU CHOIX DE L'ACTION <<<<<<<<<<<<<<<<<<<<< */
+             
+                System.out.println("Erreur de saisie");
+             
+            } /* >>>>>>>>>>>>>>>>>>>> FIN ERREUR DU CHOIX DE L'ACTION <<<<<<<<<<<<<<<<<<<<< */
+             
+             
+             
+         
+        } /* FIN WHILE CHOIXACTION != 1, 2, 3 ou 4 */
+         
+        /* -------------------- FIN COEUR DU PROGRAMME -------------------- */
+         
+         
+         
+         
+         
+         
+                                      
+    } /* FIN MAIN */
+      
+     
+} /* FIN CLASSE */
